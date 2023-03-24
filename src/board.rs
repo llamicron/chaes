@@ -1,7 +1,11 @@
-use std::collections::HashMap;
+use cli_table::{Cell, Style, Table};
 use log::*;
+use std::collections::HashMap;
 
-use crate::{piece::{Piece, self}, square::Square};
+use crate::{
+    piece::{self, Piece},
+    square::Square,
+};
 
 pub type BitBoard = std::collections::HashMap<Piece, u64>;
 
@@ -11,7 +15,7 @@ pub trait Board {
     fn get_single(&self, square: Square) -> Option<&Piece>;
     fn set_all(&mut self, piece_type: Piece, new_positions: u64);
     fn set_single(&mut self, piece: Piece, square: Square);
-
+    fn display(&self) -> String;
 }
 
 impl Board for BitBoard {
@@ -26,7 +30,6 @@ impl Board for BitBoard {
         bb.insert(Piece::Rook, 0);
         bb.insert(Piece::Queen, 0);
         bb.insert(Piece::King, 0);
-        println!("{:#?}", bb);
         bb
     }
 
@@ -74,10 +77,37 @@ impl Board for BitBoard {
             *positions = *positions | mask;
         }
     }
+
+    // This is shitty
+    // TODO: rotate the board
+    fn display(&self) -> String {
+        use cli_table::{format::Justify, print_stdout, Cell, Style, Table};
+
+        let mut rows = vec![
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![]
+        ];
+
+        for i in 0..64 {
+            let p = self.get_single(Square::try_from(i).unwrap());
+            let character = match p {
+                Some(piece) => piece.to_char(),
+                None => ' '
+            };
+            rows.get_mut((i % 8) as usize).unwrap().push(character.to_string());
+        }
+
+        let table = rows.table().bold(true);
+        
+        format!("{}", table.display().unwrap())
+    }
 }
-
-
-
 
 #[cfg(test)]
 mod tests {
@@ -102,7 +132,7 @@ mod tests {
         let mut board = BitBoard::new_empty();
 
         // Assert that every square is empty
-        for i in 0..63 {
+        for i in 0..64 {
             assert_eq!(board.get_single(Square::try_from(i).unwrap()), None);
         }
 
@@ -110,7 +140,5 @@ mod tests {
         assert_eq!(board.get_single(Square::E6), Some(&Piece::Pawn));
         assert_eq!(board.get_single(Square::E8), None);
         assert_eq!(board.get_single(Square::F6), None);
-
-
     }
 }
