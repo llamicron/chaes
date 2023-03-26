@@ -4,4 +4,5 @@ use log::*;
 mod bitboard;
 mod square;
 mod piece;
+mod position;
 

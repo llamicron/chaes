@@ -23,6 +23,12 @@ impl BitBoard {
         Self { bits, piece }
     }
 
+    /// Lets you borrow the bits
+    pub fn bits(&self) -> &u64 {
+        &self.bits
+    }
+
+    /// Creates a new, empty bitboard with an associated piece
     pub fn with_piece(color: Color, kind: PieceKind) -> Self {
         let mut bb = BitBoard::default();
         bb.set_piece(color, kind);
@@ -44,11 +50,14 @@ impl BitBoard {
         self.piece = Some(Piece::new(color, kind))
     }
 
+
+    /// Gets the status of a square: active or not
     pub fn get_square(&self, sq: Square) -> bool {
         let mask = 1 << sq as u8;
         (self.bits & mask) != 0
     }
 
+    /// Sets the status of a square
     pub fn set_square(&mut self, sq: Square, state: bool) {
         let mask: u64 = 1 << sq as u8;
 
@@ -62,6 +71,7 @@ impl BitBoard {
 
 
 impl Default for BitBoard {
+    /// A default, empty board with no associated piece
     fn default() -> Self {
         Self::new(0, None)
     }
