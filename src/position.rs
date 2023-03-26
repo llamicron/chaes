@@ -49,6 +49,7 @@ impl Position {
     }
 }
 
+
 #[cfg(test)]
 mod tests {
     use super::*;

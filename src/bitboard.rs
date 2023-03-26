@@ -88,8 +88,6 @@ impl fmt::Display for BitBoard {
             None => '1'
         };
 
-
-
         write!(f, "   A  B  C  D  E  F  G  H ").expect("Couldn't write to formatter");
         let mut rank = 8;
         for i in 0..64 {
@@ -98,12 +96,10 @@ impl fmt::Display for BitBoard {
                 write!(f, "\n{rank} ").expect("Couldn't write to formatter");
                 rank -= 1;
             }
-            let mask = 1 << i;
-            if self.bits & mask != 0 {
-                write!(f, " {piece_char} ").expect("Couldn't write to formatter");
-            } else {
-                write!(f, " 0 ").expect("Couldn't write to formatter");
-            }
+            
+            let piece_on_square = self.bits & (1 << i) != 0;
+            write!(f, " {} ", if piece_on_square { piece_char } else { '0' }).expect("Couldn't write to formatter");
+
         }
         writeln!(f, "\n   A  B  C  D  E  F  G  H ")
     }
