@@ -1,4 +1,3 @@
-use cli_table::{Cell, Style, Table};
 use log::*;
 use std::collections::HashMap;
 
@@ -15,7 +14,6 @@ pub trait Board {
     fn get_single(&self, square: Square) -> Option<&Piece>;
     fn set_all(&mut self, piece_type: Piece, new_positions: u64);
     fn set_single(&mut self, piece: Piece, square: Square);
-    fn display(&self) -> String;
 }
 
 impl Board for BitBoard {
@@ -78,35 +76,6 @@ impl Board for BitBoard {
         }
     }
 
-    // This is shitty
-    // TODO: rotate the board
-    fn display(&self) -> String {
-        use cli_table::{format::Justify, print_stdout, Cell, Style, Table};
-
-        let mut rows = vec![
-            vec![],
-            vec![],
-            vec![],
-            vec![],
-            vec![],
-            vec![],
-            vec![],
-            vec![]
-        ];
-
-        for i in 0..64 {
-            let p = self.get_single(Square::try_from(i).unwrap());
-            let character = match p {
-                Some(piece) => piece.to_char(),
-                None => ' '
-            };
-            rows.get_mut((i % 8) as usize).unwrap().push(character.to_string());
-        }
-
-        let table = rows.table().bold(true);
-        
-        format!("{}", table.display().unwrap())
-    }
 }
 
 #[cfg(test)]
