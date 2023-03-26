@@ -75,20 +75,37 @@ impl BitBoard {
             self.set_square(sq, state)
         }
     }
+
+    pub fn potential_moves(&self) -> u64 {
+        todo!();
+    }
 }
 
 impl fmt::Display for BitBoard {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let bits = format!("{:>064b}", self.bits);
+        let piece_char: char = match self.piece() {
+            Some(piece) => piece.to_char(),
+            None => '1'
+        };
+
+
+
+        write!(f, "   A  B  C  D  E  F  G  H ").expect("Couldn't write to formatter");
+        let mut rank = 8;
         for i in 0..64 {
-            if i % 8 == 0 && i != 0 {
-                write!(f, "\n").expect("Couldn't write to formatter");
+
+            if i % 8 == 0 {
+                write!(f, "\n{rank} ").expect("Couldn't write to formatter");
+                rank -= 1;
             }
-            if let Some(bit) = bits.chars().nth(i) {
-                write!(f, " {} ", bit).expect("Couldn't write to formatter");
+            let mask = 1 << i;
+            if self.bits & mask != 0 {
+                write!(f, " {piece_char} ").expect("Couldn't write to formatter");
+            } else {
+                write!(f, " 0 ").expect("Couldn't write to formatter");
             }
         }
-        write!(f, "")
+        writeln!(f, "\n   A  B  C  D  E  F  G  H ")
     }
 }
 
@@ -99,9 +116,22 @@ impl Default for BitBoard {
     }
 }
 
+impl Into<Vec<Square>> for BitBoard {
+    fn into(self) -> Vec<Square> {
+        let mut squares = Vec::new();
+        for i in 0..64 {
+            if self.bits & (1 << i) != 0 {
+                squares.push(Square::try_from(i).unwrap())
+            }
+        }
+        squares
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use Square::*;
 
     #[test]
     fn test_new_bitboard() {
@@ -154,7 +184,6 @@ mod tests {
 
     #[test]
     fn test_set_squares() {
-        use Square::*;
         let mut bb = BitBoard::default();
         assert!(bb.is_clear());
         bb.set_squares(vec![A1, H7, E7, H3, D2], true);
@@ -165,4 +194,15 @@ mod tests {
         assert!(bb.get_square(D2));
     }
 
+    #[test]
+    fn test_bitboard_into_vec_of_squares() {
+        let mut bb = BitBoard::default();
+
+        bb.set_squares(vec![H7, E3, A2], true);
+        
+        let found: Vec<Square> = bb.into();
+        assert_eq!(found, vec![H7, E3, A2]);
+    }
+
+    
 }

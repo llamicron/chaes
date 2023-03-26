@@ -29,6 +29,10 @@ impl Piece {
         self.color == Color::White
     }
 
+    pub fn color(&self) -> &Color {
+        &self.color
+    }
+
     pub fn kind(&self) -> &PieceKind {
         &self.kind
     }
