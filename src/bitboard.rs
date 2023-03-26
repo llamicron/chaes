@@ -1,3 +1,5 @@
+use std::fmt;
+
 use crate::{piece::*, square::Square};
 
 /// A BitBoard is a way to represent a chess board. It contains a 64-bit integer,
@@ -50,7 +52,6 @@ impl BitBoard {
         self.piece = Some(Piece::new(color, kind))
     }
 
-
     /// Gets the status of a square: active or not
     pub fn get_square(&self, sq: Square) -> bool {
         let mask = 1 << sq as u8;
@@ -67,8 +68,29 @@ impl BitBoard {
             self.bits &= !mask;
         }
     }
+
+    /// Sets multiple squares at once
+    pub fn set_squares(&mut self, sqs: Vec<Square>, state: bool) {
+        for sq in sqs {
+            self.set_square(sq, state)
+        }
+    }
 }
 
+impl fmt::Display for BitBoard {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let bits = format!("{:>064b}", self.bits);
+        for i in 0..64 {
+            if i % 8 == 0 && i != 0 {
+                write!(f, "\n").expect("Couldn't write to formatter");
+            }
+            if let Some(bit) = bits.chars().nth(i) {
+                write!(f, " {} ", bit).expect("Couldn't write to formatter");
+            }
+        }
+        write!(f, "")
+    }
+}
 
 impl Default for BitBoard {
     /// A default, empty board with no associated piece
@@ -129,4 +151,18 @@ mod tests {
         assert_eq!(bb.get_square(Square::E5), false);
         assert!(bb.is_clear());
     }
+
+    #[test]
+    fn test_set_squares() {
+        use Square::*;
+        let mut bb = BitBoard::default();
+        assert!(bb.is_clear());
+        bb.set_squares(vec![A1, H7, E7, H3, D2], true);
+        assert!(bb.get_square(A1));
+        assert!(bb.get_square(H7));
+        assert!(bb.get_square(E7));
+        assert!(bb.get_square(H3));
+        assert!(bb.get_square(D2));
+    }
+
 }
